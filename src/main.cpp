@@ -12,6 +12,20 @@ RTC_DATA_ATTR unsigned long timekeeper = 0;
 bool sampleTemp = false;
 bool sampleAcc  = false;
 
+void lightGreenLed(){
+  digitalWrite(LED_GREEN_PIN, HIGH);
+  delay(100);
+  digitalWrite(LED_GREEN_PIN, LOW);  
+}
+
+void lightBlueLed(){
+  pinMode(LED_BLUE_PIN, OUTPUT);
+  digitalWrite(LED_BLUE_PIN, HIGH);
+  delay(200);
+  digitalWrite(LED_BLUE_PIN, LOW);
+}
+
+
 void print_wakeup_reason(){
   esp_sleep_wakeup_cause_t wakeup_reason;
 
@@ -19,12 +33,12 @@ void print_wakeup_reason(){
 
   switch(wakeup_reason)
   {
-    case ESP_SLEEP_WAKEUP_EXT0 : Serial.println("Wakeup caused by external signal using RTC_IO"); sampleAcc  = true; break;
-    case ESP_SLEEP_WAKEUP_EXT1 : Serial.println("Wakeup caused by external signal using RTC_CNTL"); break;
-    case ESP_SLEEP_WAKEUP_TIMER : Serial.println("Wakeup caused by timer"); sampleTemp = true; break;
-    case ESP_SLEEP_WAKEUP_TOUCHPAD : Serial.println("Wakeup caused by touchpad"); break;
-    case ESP_SLEEP_WAKEUP_ULP : Serial.println("Wakeup caused by ULP program"); break;
-    default : Serial.printf("Wakeup was not caused by deep sleep: %d\n",wakeup_reason); break;
+    case ESP_SLEEP_WAKEUP_EXT0 : sampleAcc  = true; timekeeper+=10000; break;
+    case ESP_SLEEP_WAKEUP_EXT1 : break;
+    case ESP_SLEEP_WAKEUP_TIMER :sampleTemp = true; timekeeper+=10000; break;
+    case ESP_SLEEP_WAKEUP_TOUCHPAD : break;
+    case ESP_SLEEP_WAKEUP_ULP : break;
+    default : break;
   }
 }
 
@@ -63,39 +77,45 @@ void vibeISR(){
     return;
   }
   sampleAcc = true;
+  debounceTimer = millis();
   
 }
 
 void setup() {
   // Initialize serial communication
-  Serial.begin(115200);
+  setCpuFrequencyMhz(10);
+  //Serial.begin(115200);
   print_wakeup_reason();
 
   ++bootCount;
-  Serial.println("Boot Count: " + String(bootCount));
+  // Serial.println("Boot Count: " + String(bootCount));
 
   pinMode(VIBE_SENSOR_PIN, INPUT);
-
   if(!initAccelerometer()){
-    Serial.println("Error initialising accelerometer");
-    delay(3000);
+    //Serial.println("Error initialising accelerometer");
+    delay(1000);
     esp_restart();
   }
-  Serial.println("Accelerometer initialised successfully");
+  // Serial.println("Accelerometer initialised successfully");
 
   if(!initTempHumSensor()){
-    Serial.println("Error initialising Temp&Hum Sensor");
-    delay(3000);
+    //Serial.println("Error initialising Temp&Hum Sensor");
+    delay(1000);
     esp_restart();
   }
-  Serial.println("Temp&Hum Sensor initialised successfully");
+  // Serial.println("Temp&Hum Sensor initialised successfully");
 
   if(!initSDCard()){
-    Serial.println("Error initialising SD Card");
-    delay(3000);
+    //Serial.println("Error initialising SD Card");
+    delay(1000);
     esp_restart();
   }
-  Serial.println("SD Card initialised successfully");
+  // Serial.println("SD Card initialised successfully"); 
+
+  if(bootCount<2){
+    pinMode(LED_GREEN_PIN, OUTPUT); 
+    lightGreenLed();
+  }
 
 }
 
@@ -103,15 +123,20 @@ void loop() {
 
   if(sampleTemp){
     handleTempData();
+    lightBlueLed();
   }else if(sampleAcc){
+    exitAccLowPower();
     debounceTimer = millis();
     attachInterrupt(VIBE_SENSOR_PIN, vibeISR, FALLING);
     while(sampleAcc){
       sampleAcc = false;
       handleAccData();
     }
+    enterAccLowPower();
+    handleTempData();
+    lightBlueLed();
   }else{
-    Serial.println("Error Wake up?");
+    //Serial.println("Error Wake up?");
   }
   timekeeper += millis();
   goToSleep();

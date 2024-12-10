@@ -1,16 +1,16 @@
 #include "Memory_Functions.h"
 
 void readFile(fs::FS &fs, const char *path) {
-    Serial.printf("Reading file: %s\n", path);
+    //Serial.printf("Reading file: %s\n", path);
 
     File file = fs.open(path);
     if (!file) {
-        Serial.println("Failed to open file for reading");
+        //Serial.println("Failed to open file for reading");
         return;
     }
 
     while (file.available()) {
-        Serial.write(file.read());
+        //Serial.write(file.read());
     }
     file.close();
 }
@@ -26,9 +26,9 @@ void writeFile(fs::FS &fs, const char *path, const char *message) {
         return;
     }
     if(file.print(message)){
-        Serial.println("File Written");
+        //Serial.println("File Written");
     }else{
-        Serial.println("Write failed");
+        //Serial.println("Write failed");
     }
     file.close();
 }
@@ -51,7 +51,7 @@ bool initSDCard(){
     }
     uint8_t card_type = SD.cardType();
     if(card_type == CARD_NONE){
-        Serial.println("No SD card attached?");
+        //Serial.println("No SD card attached?");
         return false;
     }
     return true;

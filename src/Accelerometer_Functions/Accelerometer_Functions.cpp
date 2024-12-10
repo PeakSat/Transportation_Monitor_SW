@@ -3,7 +3,6 @@
 ADXL345 adxl = ADXL345();
 
 bool initAccelerometer(){
-    Serial.println("Starting ADXL");
     adxl.powerOn();
     adxl.setRangeSetting(4);            // Give the range settings
                                         // Accepted values are 2g, 4g, 8g or 16g
@@ -29,4 +28,12 @@ void getGValues(double &x, double &y, double &z){
     x = xyz[0];
     y = xyz[1];
     z = xyz[2];
+}
+
+void enterAccLowPower(){
+    adxl.setLowPower(true);
+}
+
+void exitAccLowPower(){
+    adxl.setLowPower(false);
 }

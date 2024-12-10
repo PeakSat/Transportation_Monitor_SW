@@ -11,4 +11,8 @@ void readAccValues(int &x, int &y, int &z);
 
 void getGValues(double &x, double &y, double &z);
 
+void enterAccLowPower();
+
+void exitAccLowPower();
+
 #endif
