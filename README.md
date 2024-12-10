@@ -32,8 +32,8 @@ This project uses **PlatformIO**, so to build and upload the software, you’ll 
 ## 📊 Data Plotter
 To visualize the logged data, follow these steps:
 
-1. Copy the .csv file from the SD card to the data folder inside the data_plotter directory.
-2. Open a command line and navigate to the data_plotter directory.
+1. Copy the .csv file from the SD card to the **data** folder inside the **data_plotter** directory.
+2. Open a command line and navigate to the **data_plotter** directory.
 3. Run the following command to see the plotted results:
 ```shell
 python transportation_data_plotter.py
